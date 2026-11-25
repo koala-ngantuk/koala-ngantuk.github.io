@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Koala Ngantuk · Gudang Game</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>
+:root{--px:"Press Start 2P",ui-monospace,"Courier New",monospace}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#0d0a14;color:#f4ecd8;font-family:var(--px)}
+body{display:flex;flex-direction:column;align-items:center;padding:28px 14px 40px;gap:22px}
+h1{margin:0;font-size:clamp(16px,5vw,28px);color:#FFD25E;text-shadow:3px 3px 0 #A8741A;text-align:center;line-height:1.4}
+.sub{font-size:10px;color:#ddd3ec;text-align:center;line-height:1.8}
+.koala{font-size:46px;line-height:1}
+.rak{display:grid;gap:14px;width:min(560px,100%)}
+a.game{display:flex;gap:14px;align-items:center;text-decoration:none;color:#f4ecd8;background:#1c1829;border:2px solid #332c47;border-bottom:5px solid #332c47;border-radius:8px;padding:14px}
+a.game:active{transform:translateY(2px);border-bottom-width:3px}
+a.game:hover{border-color:#FFD25E}
+.ikon{flex:none;width:64px;height:64px;border-radius:6px;display:grid;place-items:center;font-size:32px;background:#3a1c22;border:2px solid #FF6B5E}
+.nama{font-size:13px;color:#FFD25E;margin-bottom:8px}
+.ket{font-size:8px;line-height:1.8;color:#ddd3ec}
+.main{margin-left:auto;flex:none;font-size:9px;background:#FFD25E;color:#1D1830;border-radius:5px;padding:8px 10px;border-bottom:3px solid #A8741A}
+.segera{opacity:.45;pointer-events:none}
+.segera .ikon{background:#1a2c44;border-color:#6FB7E8}
+footer{font-size:8px;color:#7d7394;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="koala">🐨</div>
+<h1>KOALA NGANTUK</h1>
+<div class="sub">Gudang game santai.<br>Main langsung di HP atau komputer.</div>
+
+<div class="rak">
+  <a class="game" href="laga-nusantara/">
+    <div class="ikon">🥋</div>
+    <div>
+      <div class="nama">LAGA NUSANTARA</div>
+      <div class="ket">Game laga gaya arcade. Lawan komputer, berdua satu layar, atau online pakai kode 4 angka.</div>
+    </div>
+    <div class="main">MAIN</div>
+  </a>
+  <div class="game segera" style="display:flex;gap:14px;align-items:center;background:#1c1829;border:2px solid #332c47;border-radius:8px;padding:14px">
+    <div class="ikon">🎮</div>
+    <div>
+      <div class="nama">SEGERA</div>
+      <div class="ket">Game berikutnya sedang dibuat.</div>
+    </div>
+  </div>
+</div>
+
+<footer>koala-ngantuk.github.io</footer>
+</body>
+</html>
