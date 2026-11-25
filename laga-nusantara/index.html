@@ -40,6 +40,16 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
 .kt.p2{border-color:#6FB7E8;background:#1a2c44}
 .kt.p1.p2{border-color:#FFD25E;background:#3a2f1c}
 @media (max-height:560px){.kt canvas{width:36px;height:70px}#pilih{gap:5px;padding-top:8px}.lbl{font-size:7px}.kol{gap:4px}}
+#pilih{justify-content:flex-start;gap:clamp(6px,calc(var(--kc,54px)*.14),14px)}
+#pilih::before,#pilih::after{content:"";flex:1 0 0}
+#pilih .pj{font-size:clamp(12px,calc(var(--kc,54px)*.24),26px)}
+#pilih .lbl{font-size:clamp(8px,calc(var(--kc,54px)*.1),11px)}
+#pilih .kol{gap:clamp(4px,calc(var(--kc,54px)*.1),10px)}
+#pilih .kolom{gap:10px 24px}
+#pilih .kt{width:calc(var(--kc,54px) + 10px);font-size:clamp(7px,calc(var(--kc,54px)*.095),10px);gap:4px}
+#pilih .kt canvas{width:var(--kc,54px);height:calc(var(--kc,54px)*1.944)}
+#pilih .info{width:calc(var(--kc,54px)*5 + 74px);font-size:clamp(8px,calc(var(--kc,54px)*.1),11px)}
+#pilih .tbl{font-size:clamp(9px,calc(var(--kc,54px)*.15),15px)}
 .op{font-family:var(--px);font-size:7px;color:#ddd3ec;background:#1c1829;border:2px solid #332c47;border-radius:5px;padding:7px 8px;cursor:pointer;touch-action:manipulation}
 .op.on{border-color:#FFD25E;color:#FFD25E}
 .cara{font-size:7px;line-height:2;color:#9d93b5;text-align:left;max-width:34rem;border-top:1px solid #332c47;padding-top:8px;margin-top:4px}
@@ -89,7 +99,7 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
       <div class="judul" id="hasilJudul"></div>
       <div class="sub" id="hasilSub"></div>
       <button class="tbl" id="lagi">MAIN LAGI</button>
-      <div class="baris"><button class="tbl dua kecil" id="ganti">GANTI PETARUNG</button><button class="tbl dua kecil" id="keMenu">MENU</button></div>
+      <button class="tbl dua" id="keMenu">MENU</button>
     </div>
     <div id="jeda" class="lapis" hidden>
       <div class="judul">JEDA</div>
@@ -140,25 +150,8 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
   <div class="kolom">
     <div class="kol"><div class="lbl" id="lblP1"></div><div class="baris" id="barisP1"></div><div class="info" id="infoP1"></div></div>
     <div class="kol" id="kolP2"><div class="lbl" id="lblP2"></div><div class="baris" id="barisP2"></div><div class="info" id="infoP2"></div></div>
-    <div class="kol" id="kolArcade" hidden><div class="lbl">MODE ARCADE · <b>7 TAHAP</b></div>
-      <div class="info" style="--w:#FF6B5E">Kalahkan <b>5 pesilat</b> satu per satu, termasuk kembaranmu.<br>Lalu <b>SUB BOS: GENDERUWO</b>, kera raksasa yang tak bisa dibanting.<br>Terakhir <b>BOS TERAKHIR: ALIEN</b>.<br><i>Kalah? Bisa coba lagi di tahap yang sama.</i></div>
-      <div class="lbl">MULAI DARI</div><div class="baris" id="barisMulai"></div></div>
   </div>
-  <div class="kol"><div class="lbl">WAKTU PER RONDE · MENANG 2 RONDE · ARENA DIACAK</div><div class="baris" id="barisWaktu"></div></div>
   <div class="baris" style="margin-top:4px"><button class="tbl" id="mulai">MULAI</button><button class="tbl dua kecil" id="batal">KEMBALI</button></div>
-  <div class="cara">
-    <b>BAWAH, MAJU, PUKUL</b> : jurus elemen jarak jauh, memakai 1 dari 5 ruas energi<br>
-    <b>TAHAN TENDANG 1,5 DETIK</b> sambil diam : tendangan terbang<br>
-    <b>TAHAN PUKUL 1,5 DETIK</b> sambil diam : jurus elemen raksasa yang sangat lambat, memakai 1 ruas energi<br>
-    <b>Jurus elemen ditangkis</b> : memantul balik ke penembaknya, dan bisa dipantulkan lagi<br>
-    <b>PUKUL saat menempel lawan</b> : tangkap dan angkat, bawa jalan ke mana saja, lalu PUKUL lagi untuk melempar sampai menghantam ujung arena<br>
-    <b>Sedang ditangkap</b> : tekan PUKUL atau TENDANG berulang agar cepat lepas<br>
-    <b>Kena pukulan telak beruntun</b> : pusing, tidak bisa bergerak sebentar<br>
-    <b>Setiap lawan kalah</b> (ronde mana pun) : ia berdiri terhuyung. Tahan TENDANG 3 detik untuk pamungkas 1, atau tahan PUKUL 3 detik untuk pamungkas 2<br>
-    <b>PUKUL di dekat peti, tong, kaleng</b> : angkat, lalu PUKUL lagi untuk melempar<br>
-    <b>PUKUL di dekat donat atau pisang</b> : makan, darah bertambah<br>
-    Laptop · Arcade: <b>W A S D</b> atau <b>SPASI</b> lompat · <b>,</b> pukul <b>.</b> tendang <b>/</b> tangkis<br>Laptop · Dua pemain · P1: <b>W A S D</b> + <b>Z</b> tangkis <b>X</b> pukul <b>C</b> tendang · P2: <b>PANAH</b> + <b>L</b> tangkis <b>;</b> pukul <b>'</b> tendang
-  </div>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -1261,7 +1254,7 @@ function gambar(){
 /* ---------- Menu, pilih petarung, hasil ---------- */
 const layarSentuh=matchMedia('(pointer: coarse)').matches||navigator.maxTouchPoints>0;
 const pil={p1:'jalu',p2:'bandeng',waktu:60,mulai:0};
-$('petunjuk').innerHTML=(layarSentuh?'HP: kiri arah · kanan pukul, tendang, tangkis<br>Keyboard · Arcade: WASD + , . / · Dua pemain: P1 WASD + Z X C, P2 panah + L ; \'<br>':'ARCADE: W A S D · , pukul · . tendang · / tangkis<br>DUA PEMAIN · P1: W A S D · Z tangkis · X pukul · C tendang<br>P2: panah · L tangkis · ; pukul · \' tendang<br>')+'<a href="../">Kembali ke Gudang Game</a>';
+$('petunjuk').innerHTML=layarSentuh?'HP: kiri arah · kanan pukul, tendang, tangkis<br>Keyboard · Arcade: WASD + , . / · Dua pemain: P1 WASD + Z X C, P2 panah + L ; \'':'ARCADE: W A S D · , pukul · . tendang · / tangkis<br>DUA PEMAIN · P1: W A S D · Z tangkis · X pukul · C tendang<br>P2: panah · L tangkis · ; pukul · \' tendang';
 function aturLapisan(){
   const main=['intro','laga','ko','waktu','habisi','pamungkas','tamat'].includes(fase);
   $('menu').hidden=fase!=='menu';$('pilih').hidden=fase!=='pilih';$('hasil').hidden=fase!=='hasil';$('jeda').hidden=fase!=='jeda';$('online').hidden=fase!=='online';
@@ -1272,21 +1265,29 @@ function aturLapisan(){
 function bangunPilih(){
   for(const sisi of['p1','p2']){const b=$(sisi==='p1'?'barisP1':'barisP2');
     URUT.forEach(k=>{const t=document.createElement('button');t.className='kt';t.dataset.k=k;t.appendChild(potret(k));const s=document.createElement('span');s.innerHTML=DEF[k].nama.replace(' ','<br>');t.appendChild(s);t.addEventListener('click',()=>{pil[sisi]=k;segarPilih()});b.appendChild(t)})}
-  [[0,'TAHAP 1'],[5,'SUB BOS'],[6,'BOS TERAKHIR']].forEach(([n,t0])=>{const t=document.createElement('button');t.className='op';t.dataset.k=n;t.textContent=t0;t.addEventListener('click',()=>{pil.mulai=n;segarPilih()});$('barisMulai').appendChild(t)});
-  [[60,'1 MENIT'],[0,'TANPA WAKTU']].forEach(([n,s])=>{const t=document.createElement('button');t.className='op';t.dataset.k=n;t.textContent=s;t.addEventListener('click',()=>{pil.waktu=n;segarPilih()});$('barisWaktu').appendChild(t)});
 }
+const teksInfo=k=>{const d=DEF[k],pr=PROFIL[k];return '<b>'+d.asal+'</b> · '+d.silat+' · ELEMEN '+EL[d.el].n+'<br>'+pr.bio+'<br><i>Motto:</i> "'+pr.motto+'"'};
+/* layar pilih: kartu petarung dibuat sebesar mungkin tanpa perlu menggulir */
+function pasPilih(){const el=$('pilih');if(el.hidden)return;
+  const inf=[$('infoP1'),$('infoP2')],asli=inf[0].innerHTML;
+  for(let kc=Math.max(30,Math.min(144,Math.floor((innerWidth-90)/5)));kc>=30;kc-=3){
+    el.style.setProperty('--kc',kc+'px');
+    inf.forEach(i=>i.style.minHeight='');let maks=0; /* tinggi kotak info mengikuti bio terpanjang, supaya tidak melompat saat ganti petarung */
+    for(const k of URUT){inf[0].innerHTML=teksInfo(k);maks=Math.max(maks,inf[0].offsetHeight)}
+    inf[0].innerHTML=asli;inf.forEach(i=>i.style.minHeight=maks+'px');
+    if(el.scrollHeight<=el.clientHeight)break}
+}
+addEventListener('resize',pasPilih);
 function segarPilih(){
   for(const sisi of['p1','p2']){const p=sisi==='p1',k=pil[sisi],d=DEF[k],pr=PROFIL[k];
     document.querySelectorAll('#'+(p?'barisP1':'barisP2')+' .kt').forEach(t=>t.classList.toggle(sisi,t.dataset.k===k));
     $(p?'lblP1':'lblP2').innerHTML=(p?'PEMAIN 1':mode==='cpu'?'KOMPUTER':'PEMAIN 2')+(layarSentuh?'':p?' (A / D)':' (PANAH KIRI / KANAN)')+' · <b>'+d.nama+'</b>';
     /* kotak info: asal, perkenalan singkat, motto, jurus pamungkas */
     const info=$(p?'infoP1':'infoP2');info.style.setProperty('--w',EL[d.el].c);
-    info.innerHTML='<b>'+d.asal+'</b> · '+d.silat+' · ELEMEN '+EL[d.el].n+'<br>'+pr.bio+'<br><i>Motto:</i> "'+pr.motto+'"<br><i>Pamungkas:</i> <b>'+pr.pam+'</b> <i>(tahan tendang)</i> · <b>'+pr.pam2+'</b> <i>(tahan pukul)</i>'}
-  document.querySelectorAll('#barisWaktu .op').forEach(t=>t.classList.toggle('on',+t.dataset.k===pil.waktu));
-  document.querySelectorAll('#barisMulai .op').forEach(t=>t.classList.toggle('on',+t.dataset.k===pil.mulai));
-  $('kolP2').hidden=mode==='cpu';$('kolArcade').hidden=mode!=='cpu';
+    info.innerHTML=teksInfo(k)}
+  $('kolP2').hidden=mode==='cpu';
 }
-function bukaPilih(m){mode=m;if(!URUT.includes(pil.p2))pil.p2=pil.p1==='bandeng'?'jalu':'bandeng';fase='pilih';segarPilih();aturLapisan();$('pilih').scrollTop=0}
+function bukaPilih(m){mode=m;if(!URUT.includes(pil.p2))pil.p2=pil.p1==='bandeng'?'jalu':'bandeng';fase='pilih';segarPilih();aturLapisan();pasPilih();$('pilih').scrollTop=0}
 function mulaiLaga(kunci){ /* pertandingan baru: arena diacak (online: arena pilihan host), yang lebih dulu menang 2 ronde jadi juara */
   siapkanArena(Object.keys(ARENA).includes(kunci)?kunci:Object.keys(ARENA)[Math.random()*5|0]);
   skor=[0,0];ronde=1;durasi=pil.waktu;juara=null;tandingSelesai=false;pamNama='';pamData={};mulaiRonde();
@@ -1315,7 +1316,7 @@ function tampilHasil(){
     else if(i>=n-1){judul='JUARA NUSANTARA!';sub='Semua lawan tumbang, termasuk '+p2.def.nama+'. '+sub;tombol='MAIN DARI AWAL'}
     else{const b=DEF[arcade.urutan[i+1]];sub='Tahap '+(i+1)+' dari '+n+' selesai · Berikutnya: '+(b.bos?b.bos+' ':'')+b.nama;tombol='LAWAN BERIKUTNYA'}}
   $('hasilJudul').textContent=judul;$('hasilSub').textContent=sub;$('lagi').textContent=tombol;
-  $('lagi').hidden=mode==='online';$('ganti').hidden=mode==='online';$('keMenu').textContent=mode==='online'?'KEMBALI KE MENU':'MENU';
+  $('lagi').hidden=mode==='online';$('keMenu').textContent=mode==='online'?'KEMBALI KE MENU':'MENU';
   aturLapisan();
 }
 function jeda(){if(fase==='intro'||fase==='laga'){faseSebelumJeda=fase;fase='jeda';aturLapisan()}}
@@ -1323,7 +1324,7 @@ function lanjut(){if(fase==='jeda'){fase=faseSebelumJeda;for(const n in tekan)te
 function keMenu(){if(mode==='online')putusOnline();fase='menu';aturLapisan()}
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>bukaPilih(b.dataset.mode)));
 $('mulai').addEventListener('click',mulaiDariPilih);$('batal').addEventListener('click',keMenu);
-$('lagi').addEventListener('click',lanjutHasil);$('ganti').addEventListener('click',()=>bukaPilih(mode));
+$('lagi').addEventListener('click',lanjutHasil);
 $('keMenu').addEventListener('click',keMenu);$('jedaMenu').addEventListener('click',keMenu);
 $('lanjut').addEventListener('click',lanjut);$('tJeda').addEventListener('click',jeda);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&mode!=='online')jeda()});
