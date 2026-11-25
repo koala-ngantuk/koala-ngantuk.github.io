@@ -15,7 +15,7 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
 @media (orientation:portrait){#app{justify-content:flex-start;padding-top:5vh}}
 #layar{position:relative;width:min(100vw,calc(100vh*16/9));aspect-ratio:16/9;background:#000;flex:none}
 @supports (height:100dvh){#layar{width:min(100vw,calc(100dvh*16/9))}}
-#layar canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+#layar>canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
 .lapis{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(5px,1.8vmin,14px);background:rgba(13,10,20,.72);text-align:center;padding:8px}
 .judul{font-size:clamp(14px,4.4vmin,30px);color:#FFD25E;text-shadow:3px 3px 0 #B3261E;line-height:1.35}
 .sub{font-size:clamp(7px,1.9vmin,11px);color:#ddd3ec;line-height:1.8}
@@ -24,8 +24,9 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
 .tbl.dua{background:#E8E1D2;border-bottom-color:#9b927f}
 .tbl.kecil{min-width:0}
 .tbl:active{transform:translateY(2px);border-bottom-width:2px}
+.tbl:disabled{opacity:.55;cursor:default}
 .baris{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;max-width:100%}
-#tJeda{position:absolute;left:2.6%;top:19.5%;font-family:var(--px);font-size:clamp(7px,1.8vmin,10px);color:#f4ecd8;background:rgba(29,24,48,.75);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:.45em .7em;cursor:pointer;touch-action:manipulation}
+#tJeda,#tKeluar{position:absolute;left:2.6%;top:19.5%;font-family:var(--px);font-size:clamp(7px,1.8vmin,10px);color:#f4ecd8;background:rgba(29,24,48,.75);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:.45em .7em;cursor:pointer;touch-action:manipulation}
 /* layar pilih petarung */
 #pilih{position:fixed;inset:0;z-index:5;background:#0d0a14;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 8px 24px;touch-action:pan-y}
 .pj{font-size:clamp(12px,3vmin,20px);color:#FFD25E;text-shadow:2px 2px 0 #B3261E}
@@ -61,6 +62,13 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
 @media (orientation:landscape){#kendali{opacity:.6}#pad{width:118px;height:118px}#tombol{grid-template-columns:62px 62px;grid-template-rows:62px 40px}}
 #bantu{position:fixed;left:0;right:0;top:calc(5vh + 56.25vw + 14px);font-size:8px;line-height:2;color:#9d93b5;text-align:center;padding:0 16px}
 @media (orientation:landscape){#bantu{display:none}}
+/* layar online di layar kecil (HP): layar penuh yang bisa digulir, seperti layar pilih petarung */
+@media (max-width:700px),(max-height:560px){
+  #online{position:fixed;z-index:5;background:#0d0a14;overflow-y:auto;justify-content:flex-start;padding:12px 10px 24px;touch-action:pan-y}
+  #online::before,#online::after{content:"";flex:1 0 0}
+  #online .sub{font-size:9px}
+}
+#onCodeIn{-webkit-user-select:text;user-select:text;touch-action:manipulation}
 </style>
 </head>
 <body>
@@ -68,6 +76,7 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
   <div id="layar">
     <canvas id="c" width="384" height="216"></canvas>
     <button id="tJeda" hidden aria-label="Jeda">II JEDA</button>
+    <button id="tKeluar" hidden>X KELUAR</button>
     <div id="menu" class="lapis">
       <div class="judul">LAGA<br>NUSANTARA</div>
       <div class="sub">5 pesilat · 5 arena · 2 bos</div>
@@ -89,11 +98,12 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
     </div>
     <div id="online" class="lapis" hidden>
       <div class="judul" style="font-size:20px">ONLINE</div>
-      <div class="sub">2 laptop di jaringan (WiFi) yang sama. Perlu internet sebentar saat tersambung.</div>
+      <div class="sub">2 perangkat (laptop atau HP Android) di jaringan yang sama. Perlu internet saat menyambung.</div>
       <div id="onRole" class="baris" style="margin-top:6px">
         <button class="tbl" id="onHost">BUAT KODE</button>
         <button class="tbl dua" id="onJoin">GABUNG DENGAN KODE</button>
       </div>
+      <div class="sub" id="onInfo" hidden></div>
       <div id="onHostBox" class="kol" hidden>
         <div class="lbl">BAGIKAN KODE INI KE LAWAN</div>
         <div class="info" id="onCode" style="font-size:28px;text-align:center;letter-spacing:6px;font-family:var(--px)">…</div>
@@ -112,7 +122,7 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
         <button class="tbl" id="onSiap">SIAP</button>
       </div>
       <div class="baris" style="margin-top:6px"><button class="tbl dua kecil" id="onBatal">KEMBALI</button></div>
-      <div class="cara" style="margin-top:8px">Kontrol online (laptop masing-masing): <b>W A S D</b> atau <b>SPASI</b> lompat · <b>,</b> pukul · <b>.</b> tendang · <b>/</b> tangkis</div>
+      <div class="cara" id="onCara" style="margin-top:8px">Kontrol online (laptop masing-masing): <b>W A S D</b> atau <b>SPASI</b> lompat · <b>,</b> pukul · <b>.</b> tendang · <b>/</b> tangkis</div>
     </div>
   </div>
   <div id="bantu" hidden>Putar HP mendatar agar layar lebih besar<br>▼ lalu arah maju + PUKUL = jurus elemen<br>tahan TENDANG 1,5 detik = tendangan terbang<br>tahan PUKUL 1,5 detik = jurus raksasa lambat<br>PUKUL saat menempel = tangkap, PUKUL lagi = lempar<br>PUKUL dekat barang atau makanan = ambil<br>lawan terhuyung: tahan TENDANG atau PUKUL 3 detik</div>
@@ -147,24 +157,27 @@ html,body{margin:0;height:100%;background:#0d0a14;color:#f4ecd8;overflow:hidden;
     <b>Setiap lawan kalah</b> (ronde mana pun) : ia berdiri terhuyung. Tahan TENDANG 3 detik untuk pamungkas 1, atau tahan PUKUL 3 detik untuk pamungkas 2<br>
     <b>PUKUL di dekat peti, tong, kaleng</b> : angkat, lalu PUKUL lagi untuk melempar<br>
     <b>PUKUL di dekat donat atau pisang</b> : makan, darah bertambah<br>
-    Laptop · P1: <b>W A S D</b> + <b>Z</b> tangkis <b>X</b> pukul <b>C</b> tendang · P2: <b>PANAH</b> + <b>L</b> tangkis <b>;</b> pukul <b>'</b> tendang
+    Laptop · Arcade: <b>W A S D</b> atau <b>SPASI</b> lompat · <b>,</b> pukul <b>.</b> tendang <b>/</b> tangkis<br>Laptop · Dua pemain · P1: <b>W A S D</b> + <b>Z</b> tangkis <b>X</b> pukul <b>C</b> tendang · P2: <b>PANAH</b> + <b>L</b> tangkis <b>;</b> pukul <b>'</b> tendang
   </div>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
-/* ===== LAGA NUSANTARA · Versi 7 ===== (kode online 4 angka, spasi=lompat, , . / pukul-tendang-tangkis, tukar fatality UFO/meteor)
+/* ===== LAGA NUSANTARA · Versi 9 ===== (online bisa dari HP: tombol sentuh, layar online penuh di layar kecil, tombol KELUAR, petarung bawaan dikirim ke lawan; online: status sambungan dan batas waktu, coba ulang, arena dan makanan seragam, jeda kontrol tetap; kode online 4 angka, spasi=lompat, , . / pukul-tendang-tangkis, tukar fatality UFO/meteor)
    Layar logis 384x216, gambar piksel lewat kode, langkah tetap 60/detik. */
 const W=384,H=216,G=198,FONT='"Press Start 2P",monospace',ISI=90,ISI_P=180;
 const cv=document.getElementById('c');let ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
 const $=id=>document.getElementById(id);
 let benih=7;const acak=()=>(benih=(benih*16807)%2147483647)/2147483647;
+/* acakan yang memengaruhi jalannya laga: saat online memakai benih kiriman host, supaya kedua laptop sama persis */
+let benihLaga=1;const acakLaga=()=>mode==='online'?(benihLaga=(benihLaga*16807)%2147483647)/2147483647:Math.random();
 const px=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h)};
 const jepit=(v,a,b)=>Math.max(a,Math.min(b,v));
 let p1,p2,fase='menu',faseT=0,mode='cpu',waktu=30,frameWaktu=0,hentak=0,goyang=0,semangat=.6,tik=0,faseSebelumJeda='laga';
 let partikel=[],tembak=[],barang=[],makanan=[],apung=[],comboTeks=null,pemenang=null,gandaKO=false,jatah=300,AR=null,penonton=[];
 let skor=[0,0],ronde=1,durasi=60,juara=null,tandingSelesai=false,pamNama='',pamData={},pamOn=false,pamObj=null,retak=[],arcade={urutan:[],idx:0};
-let NET={peer:null,conn:null,role:null,connected:false,frame:0,sendFrame:0,localBuf:{},remoteBuf:{},myPick:null,peerPick:null,siapSaya:false,siapLawan:false};
+const TUNDA=3; /* online: tombol dijalankan 3 langkah (0,05 detik) setelah ditekan, memberi waktu kiriman sampai ke lawan */
+let NET={peer:null,conn:null,role:null,connected:false,frame:0,localBuf:{},remoteBuf:{},myPick:null,peerPick:null,siapSaya:false,siapLawan:false,coba:0,tServer:null,tJalur:null,tunggu:0};
 
 /* ---------- Lima elemen (Panca Maha Bhuta) ---------- */
 const EL={
@@ -299,7 +312,7 @@ function gerakBarang(){
 /* ---------- Makanan bonus darah ---------- */
 const GIZI={donat:15,pisang:10};
 function gerakMakanan(){
-  if(fase==='laga'&&--jatah<=0){jatah=480+Math.random()*360;if(makanan.length<2)makanan.push({tipe:Math.random()<.5?'donat':'pisang',x:30+Math.random()*(W-60),y:-G-12,vy:0,t:0,darat:0})}
+  if(fase==='laga'&&--jatah<=0){jatah=480+acakLaga()*360;if(makanan.length<2)makanan.push({tipe:acakLaga()<.5?'donat':'pisang',x:30+acakLaga()*(W-60),y:-G-12,vy:0,t:0,darat:0})}
   for(const m of makanan){if(!m.darat){m.vy=Math.min(2.4,m.vy+.08);m.y+=m.vy;if(m.y>=0){m.y=0;m.darat=1;m.t=480;debu(m.x)}}else if(--m.t<=0)m.mati=1}
   makanan=makanan.filter(m=>!m.mati);
 }
@@ -610,6 +623,11 @@ function bacaMasukan(){
   if(mode==='online'){
     const mine=NET.role==='host'?p1:p2,theirs=NET.role==='host'?p2:p1;
     const kosong={l:0,r:0,u:0,d:0,p:0,k:0,b:0};
+    /* tombol saat ini dijadwalkan TUNDA langkah ke depan dan dikirim sekali per langkah yang benar-benar dijalankan: jeda kontrol tetap, tidak menumpuk */
+    const baru={l:k('KeyA'),r:k('KeyD'),u:k('KeyW')|k('Space'),d:k('KeyS'),p:k('Comma'),k:k('Period'),b:k('Slash')};
+    for(const n in baru)baru[n]=baru[n]|sentuh[n]|(ketukSentuh.has(n)?1:0);
+    ketuk.clear();ketukSentuh.clear();
+    NET.localBuf[NET.frame+TUNDA]=baru;kirim({t:'inp',f:NET.frame+TUNDA,i:baru});
     const o=NET.localBuf[NET.frame]||kosong,r=NET.remoteBuf[NET.frame]||kosong;
     for(const n in o)mine.inp[n]=o[n];
     for(const n in r)theirs.inp[n]=r[n];
@@ -618,29 +636,23 @@ function bacaMasukan(){
     for(const f of[p1,p2])if(!f.ai&&!aktif(f))for(const n in f.inp)f.inp[n]=0;
     return;
   }
-  const a={l:k('KeyA'),r:k('KeyD'),u:k('KeyW')|k('Space'),d:k('KeyS'),b:k('KeyZ'),p:k('KeyX'),k:k('KeyC')};
+  const ar=mode==='cpu'; /* arcade: , pukul . tendang / tangkis, seperti mode online */
+  const a={l:k('KeyA'),r:k('KeyD'),u:k('KeyW')|k('Space'),d:k('KeyS'),b:k('KeyZ')|(ar?k('Slash'):0),p:k('KeyX')|(ar?k('Comma'):0),k:k('KeyC')|(ar?k('Period'):0)};
   const b={l:k('ArrowLeft'),r:k('ArrowRight'),u:k('ArrowUp'),d:k('ArrowDown'),b:k('KeyL'),p:k('Semicolon'),k:k('Quote')};
   for(const n in a)p1.inp[n]=a[n]|sentuh[n]|(ketukSentuh.has(n)?1:0)|(mode==='cpu'?b[n]:0);
   ketuk.clear();ketukSentuh.clear();
   if(mode==='cpu')otak(p2,p1);else for(const n in b)p2.inp[n]=b[n];
   for(const f of[p1,p2])if(!f.ai&&!aktif(f))for(const n in f.inp)f.inp[n]=0;
 }
-function sampleKirimOnline(){
-  const k=c=>tekan[c]||ketuk.has(c)?1:0;
-  const o={l:k('KeyA'),r:k('KeyD'),u:k('KeyW')|k('Space'),d:k('KeyS'),p:k('Comma'),k:k('Period'),b:k('Slash')};
-  for(const n in o)o[n]=o[n]|sentuh[n]|(ketukSentuh.has(n)?1:0);
-  ketuk.clear();ketukSentuh.clear();
-  NET.localBuf[NET.sendFrame]=o;
-  kirim({t:'inp',f:NET.sendFrame,i:o});
-  NET.sendFrame++;
-}
-
 /* ---------- Langkah permainan ---------- */
 function langkah(){
+  const diam=fase==='menu'||fase==='pilih'||fase==='hasil'||fase==='jeda'||fase==='online';
+  if(mode==='online'&&!diam){ /* tunggu tombol lawan untuk langkah ini; selama menunggu tidak ada yang maju, supaya kedua laptop tetap sama */
+    if(!NET.connected||NET.remoteBuf[NET.frame]===undefined||NET.localBuf[NET.frame]===undefined){NET.tunggu++;return}
+    NET.tunggu=0}
   tik++;
   if(semangat>.6)semangat-=.02;
-  if(fase==='menu'||fase==='pilih'||fase==='hasil'||fase==='jeda'||fase==='online')return;
-  if(mode==='online'){if(!NET.connected||NET.remoteBuf[NET.frame]===undefined||NET.localBuf[NET.frame]===undefined)return}
+  if(diam)return;
   faseT++;
   if(hentak>0){hentak--;return}
   if(goyang>0)goyang-=.5;
@@ -1243,17 +1255,19 @@ function gambar(){
   if(pam&&faseT<100)tulis(pamNama,W/2,48,16,EL[pemenang.def.el].c);
   if(fase==='tamat'&&faseT<110)tulis('K.O.',W/2,74,32,'#FF6B5E');
   if(comboTeks)tulis(comboTeks.n+' HIT!',comboTeks.kiri?16:W-16,60,8,'#FFD25E',comboTeks.kiri?'left':'right');
+  if(mode==='online'&&NET.tunggu>45){ctx.fillStyle='rgba(13,10,20,.8)';ctx.fillRect(W/2-100,118,200,30);tulis('MENUNGGU LAWAN...',W/2,123,8,'#FFD25E');tulis(layarSentuh?'KELUAR: TOMBOL KIRI ATAS':'ESC = KELUAR',W/2,136,8,'#ddd3ec')}
 }
 
 /* ---------- Menu, pilih petarung, hasil ---------- */
 const layarSentuh=matchMedia('(pointer: coarse)').matches||navigator.maxTouchPoints>0;
 const pil={p1:'jalu',p2:'bandeng',waktu:60,mulai:0};
-$('petunjuk').innerHTML=(layarSentuh?'HP: kiri arah · kanan pukul, tendang, tangkis<br>Keyboard · P1: WASD + Z X C · P2: panah + L ; \'<br>':'P1: W A S D · Z tangkis · X pukul · C tendang<br>P2: panah · L tangkis · ; pukul · \' tendang<br>')+'<a href="../">Kembali ke Gudang Game</a>';
+$('petunjuk').innerHTML=(layarSentuh?'HP: kiri arah · kanan pukul, tendang, tangkis<br>Keyboard · Arcade: WASD + , . / · Dua pemain: P1 WASD + Z X C, P2 panah + L ; \'<br>':'ARCADE: W A S D · , pukul · . tendang · / tangkis<br>DUA PEMAIN · P1: W A S D · Z tangkis · X pukul · C tendang<br>P2: panah · L tangkis · ; pukul · \' tendang<br>')+'<a href="../">Kembali ke Gudang Game</a>';
 function aturLapisan(){
   const main=['intro','laga','ko','waktu','habisi','pamungkas','tamat'].includes(fase);
   $('menu').hidden=fase!=='menu';$('pilih').hidden=fase!=='pilih';$('hasil').hidden=fase!=='hasil';$('jeda').hidden=fase!=='jeda';$('online').hidden=fase!=='online';
   $('tJeda').hidden=!(fase==='intro'||fase==='laga')||mode==='online';
-  $('kendali').hidden=!(layarSentuh&&main)||mode==='online';$('bantu').hidden=!(layarSentuh&&main)||mode==='online';
+  $('tKeluar').hidden=!(layarSentuh&&main&&mode==='online'); /* pengganti ESC di layar sentuh */
+  $('kendali').hidden=!(layarSentuh&&main);$('bantu').hidden=!(layarSentuh&&main); /* tombol sentuh juga dipakai saat online */
 }
 function bangunPilih(){
   for(const sisi of['p1','p2']){const b=$(sisi==='p1'?'barisP1':'barisP2');
@@ -1273,8 +1287,8 @@ function segarPilih(){
   $('kolP2').hidden=mode==='cpu';$('kolArcade').hidden=mode!=='cpu';
 }
 function bukaPilih(m){mode=m;if(!URUT.includes(pil.p2))pil.p2=pil.p1==='bandeng'?'jalu':'bandeng';fase='pilih';segarPilih();aturLapisan();$('pilih').scrollTop=0}
-function mulaiLaga(){ /* pertandingan baru: arena selalu diacak, yang lebih dulu menang 2 ronde jadi juara */
-  siapkanArena(Object.keys(ARENA)[Math.random()*5|0]);
+function mulaiLaga(kunci){ /* pertandingan baru: arena diacak (online: arena pilihan host), yang lebih dulu menang 2 ronde jadi juara */
+  siapkanArena(Object.keys(ARENA).includes(kunci)?kunci:Object.keys(ARENA)[Math.random()*5|0]);
   skor=[0,0];ronde=1;durasi=pil.waktu;juara=null;tandingSelesai=false;pamNama='';pamData={};mulaiRonde();
 }
 function mulaiRonde(){
@@ -1282,7 +1296,7 @@ function mulaiRonde(){
   if(mode==='cpu')p2.ai={t:30,tahan:0};
   waktu=durasi;frameWaktu=0;hentak=0;goyang=0;pamOn=false;pamData={};retak=[];partikel=[];tembak=[];makanan=[];apung=[];comboTeks=null;pemenang=null;gandaKO=false;
   barang=['peti','tong','kaleng'].map((t,n)=>({tipe:t,x:AR.barang[n],y:0,vx:0,vy:0,st:'tanah',pemilik:null}));
-  jatah=300+Math.random()*300;
+  jatah=300+acakLaga()*300;
   fase='intro';faseT=0;for(const n in sentuh)sentuh[n]=0;aturLapisan();
 }
 function rondeBerikut(){ronde++;mulaiRonde()}
@@ -1316,6 +1330,24 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&mode!=='on
 document.addEventListener('contextmenu',e=>e.preventDefault());
 
 /* ---------- Online (LAN, P2P lewat WebRTC/PeerJS) ---------- */
+/* AWALAN berganti tiap aturan online berubah, supaya file versi lama dan baru tidak saling tersambung lalu berbeda jalannya */
+const AWALAN='ln8-',BATAS_SERVER=12000,BATAS_JALUR=20000;
+const PESAN={
+  modul:'Gagal memuat modul online (perlu koneksi internet saat membuka halaman ini).',
+  server:'Tidak bisa menghubungi server perantara. Periksa internet di laptop ini.',
+  jalur:'Jalur langsung ke laptop lawan gagal dibuka. Jaringan ini kemungkinan melarang perangkat saling terhubung. Coba pakai hotspot HP.',
+  kode:'Kode tidak ditemukan. Periksa angkanya, pastikan layar lawan bertuliskan "Kode aktif", dan kedua laptop memakai file versi yang sama.',
+  diam:'Lawan tidak menjawab. Pastikan layar lawan bertuliskan "Kode aktif", lalu tekan SAMBUNG lagi.',
+  browser:'Browser ini tidak mendukung mode online. Pakai Chrome atau Edge versi terbaru.'
+};
+function pesanGalat(e){const t=(e&&e.type)||'';
+  if(t==='browser-incompatible')return PESAN.browser;
+  if(t==='peer-unavailable')return PESAN.kode;
+  if(t==='webrtc')return PESAN.jalur;
+  if(['network','server-error','socket-error','socket-closed','disconnected'].includes(t))return PESAN.server;
+  return 'Gagal: '+(t||e)}
+const statusHost=s=>{$('onHostStatus').textContent=s},statusJoin=s=>{$('onJoinStatus').textContent=s};
+function hentiTimer(){clearTimeout(NET.tServer);clearTimeout(NET.tJalur);NET.tServer=NET.tJalur=null}
 function kirim(obj){if(NET.conn&&NET.conn.open)try{NET.conn.send(obj)}catch(_){}}
 function bangunOnline(){
   const b=$('barisOnline');
@@ -1325,74 +1357,110 @@ function bangunOnline(){
     b.appendChild(t)});
 }
 function resetOnlineUI(){
-  $('onRole').hidden=false;$('onHostBox').hidden=true;$('onJoinBox').hidden=true;$('onPickBox').hidden=true;
-  $('onHostStatus').textContent='Menyiapkan kode…';$('onJoinStatus').textContent='';$('onCodeIn').value='';
+  $('onRole').hidden=false;$('onHostBox').hidden=true;$('onJoinBox').hidden=true;$('onPickBox').hidden=true;$('onInfo').hidden=true;
+  statusHost('');statusJoin('');$('onCode').textContent='…';$('onCodeIn').value='';$('onConnect').disabled=false;
   $('onSiap').disabled=false;$('onSiap').textContent='SIAP';
 }
 function bukaOnline(){fase='online';resetOnlineUI();aturLapisan()}
 function tutupOnline(){putusOnline();fase='menu';aturLapisan()}
 function putusOnline(){
+  NET.coba++;hentiTimer(); /* nomor percobaan berganti: jawaban dari percobaan lama diabaikan */
   NET.connected=false;
   if(NET.conn)try{NET.conn.close()}catch(_){}
   if(NET.peer)try{NET.peer.destroy()}catch(_){}
-  NET.peer=null;NET.conn=null;NET.role=null;NET.frame=0;NET.sendFrame=0;NET.localBuf={};NET.remoteBuf={};
+  NET.peer=null;NET.conn=null;NET.role=null;NET.frame=0;NET.tunggu=0;NET.localBuf={};NET.remoteBuf={};
   NET.myPick=null;NET.peerPick=null;NET.siapSaya=false;NET.siapLawan=false;
 }
 function onlinePutusLawan(){
-  if(!NET.connected)return;NET.connected=false;
-  if(fase==='online'){resetOnlineUI();$('onHostStatus').textContent='Lawan terputus.';$('onJoinStatus').textContent='Lawan terputus.'}
-  else{mode='cpu';fase='menu';aturLapisan()}
+  if(!NET.connected)return;
+  const diHasil=fase==='hasil';
+  putusOnline();mode='cpu';
+  if(diHasil){fase='menu';aturLapisan();return}
+  fase='online';resetOnlineUI();
+  $('onInfo').textContent='Sambungan dengan lawan terputus. Buat kode baru untuk main lagi.';$('onInfo').hidden=false;
+  aturLapisan();
 }
-function setupConn(){
-  NET.conn.on('data',d=>{
+function pasangConn(c){
+  c.on('data',d=>{
+    if(NET.conn!==c||!d)return;
     if(d.t==='pick'){NET.peerPick=d.k;segarOnlinePick()}
     else if(d.t==='ready'){NET.siapLawan=true;cobaMulaiOnline()}
-    else if(d.t==='start'){mulaiOnlineMatch(d.p1,d.p2,d.waktu)}
+    else if(d.t==='start'){mulaiOnlineMatch(d.p1,d.p2,d.waktu,d.arena,d.benih)}
     else if(d.t==='inp'){NET.remoteBuf[d.f]=d.i}
   });
-  NET.conn.on('close',onlinePutusLawan);
-  NET.conn.on('error',()=>{});
+  c.on('close',()=>{if(NET.conn===c)onlinePutusLawan()});
 }
+/* memantau pembukaan jalur langsung: gagal() bila browser menyerah, dijawab() saat laptop lawan sudah membalas */
+function pantauJalur(c,gagal,dijawab){const pc=c.peerConnection;if(!pc||!pc.addEventListener)return;
+  pc.addEventListener('iceconnectionstatechange',()=>{if(pc.iceConnectionState==='failed')gagal()});
+  if(dijawab)pc.addEventListener('signalingstatechange',()=>{if(pc.signalingState==='stable')dijawab()})}
 function bukaKodeBaru(coba){
-  const kode=String(1000+Math.floor(Math.random()*9000));
-  $('onCode').textContent=kode;
-  NET.peer=new Peer('ln6-'+kode);
-  NET.peer.on('open',()=>{$('onCode').textContent=kode});
-  NET.peer.on('connection',c=>{
-    if(NET.conn){try{c.close()}catch(_){}return}
-    NET.conn=c;setupConn();
-    c.on('open',()=>{NET.connected=true;$('onHostStatus').textContent='Lawan tersambung!';mulaiPemilihanOnline()});
+  const id=NET.coba,kode=String(1000+Math.floor(Math.random()*9000));
+  let pernahBuka=false,ulang=0;
+  $('onCode').textContent='…';statusHost('Menghubungi server perantara…');
+  const peer=NET.peer=new Peer(AWALAN+kode),usang=()=>id!==NET.coba||NET.peer!==peer;
+  clearTimeout(NET.tServer);
+  NET.tServer=setTimeout(()=>{if(!usang()&&!pernahBuka)statusHost(PESAN.server+' Tekan KEMBALI lalu BUAT KODE lagi.')},BATAS_SERVER);
+  peer.on('open',()=>{ /* kode baru ditampilkan setelah benar-benar terdaftar di server */
+    if(usang())return;pernahBuka=true;ulang=0;clearTimeout(NET.tServer);
+    $('onCode').textContent=kode;if(!NET.conn&&!NET.connected)statusHost('Kode aktif. Menunggu lawan memasukkan kode ini…')});
+  peer.on('connection',c=>{
+    if(usang()||NET.connected){try{c.close()}catch(_){}return}
+    if(NET.conn){const lama=NET.conn;NET.conn=null;try{lama.close()}catch(_){}} /* percobaan lawan sebelumnya belum sempat terbuka: ganti dengan yang baru, jangan ditolak */
+    NET.conn=c;pasangConn(c);
+    statusHost('Lawan memasukkan kode. Membuka jalur langsung…');
+    const gagal=()=>{if(usang()||NET.conn!==c||NET.connected)return;clearTimeout(NET.tJalur);NET.conn=null;try{c.close()}catch(_){}
+      statusHost(PESAN.jalur+' Kode ini masih aktif.')};
+    clearTimeout(NET.tJalur);NET.tJalur=setTimeout(gagal,BATAS_JALUR);
+    c.on('error',gagal);pantauJalur(c,gagal);
+    c.on('open',()=>{if(usang()||NET.conn!==c)return;clearTimeout(NET.tJalur);NET.connected=true;statusHost('Lawan tersambung!');mulaiPemilihanOnline()});
   });
-  NET.peer.on('error',e=>{
-    if(e&&e.type==='unavailable-id'&&coba<6){try{NET.peer.destroy()}catch(_){}bukaKodeBaru(coba+1);return}
-    $('onHostStatus').textContent='Gagal: '+((e&&e.type)||e);
+  peer.on('disconnected',()=>{ /* hubungan ke server perantara putus sebelum lawan masuk: sambung ulang supaya kode tetap berlaku */
+    if(usang()||NET.connected||peer.destroyed||!pernahBuka)return;
+    if(++ulang>5){statusHost(PESAN.server+' Tekan KEMBALI lalu BUAT KODE lagi.');return}
+    statusHost('Hubungan ke server perantara terputus. Menyambung ulang…');
+    setTimeout(()=>{if(!usang()&&!NET.connected&&!peer.destroyed&&peer.disconnected)try{peer.reconnect()}catch(_){}},1500)});
+  peer.on('error',e=>{
+    if(usang())return;
+    if(e&&e.type==='unavailable-id'&&!pernahBuka&&coba<6){try{peer.destroy()}catch(_){}bukaKodeBaru(coba+1);return}
+    if(!NET.connected)statusHost(pesanGalat(e)+(pernahBuka?'':' Tekan KEMBALI lalu BUAT KODE lagi.'));
   });
 }
 function onlineHost(){
   putusOnline();NET.role='host';
-  $('onRole').hidden=true;$('onHostBox').hidden=false;$('onCode').textContent='…';
-  if(typeof Peer==='undefined'){$('onHostStatus').textContent='Gagal memuat modul online (perlu koneksi internet saat membuka halaman ini).';return}
+  $('onRole').hidden=true;$('onInfo').hidden=true;$('onHostBox').hidden=false;$('onCode').textContent='…';
+  if(typeof Peer==='undefined'){statusHost(PESAN.modul);return}
   bukaKodeBaru(0);
 }
 function onlineJoinUI(){
-  putusOnline();$('onRole').hidden=true;$('onJoinBox').hidden=false;
+  putusOnline();$('onRole').hidden=true;$('onInfo').hidden=true;$('onJoinBox').hidden=false;$('onConnect').disabled=false;statusJoin('');
 }
 function onlineConnect(){
-  const kode=$('onCodeIn').value.trim();if(!kode)return;
-  NET.role='guest';$('onJoinStatus').textContent='Menyambungkan…';
-  if(typeof Peer==='undefined'){$('onJoinStatus').textContent='Gagal memuat modul online (perlu koneksi internet saat membuka halaman ini).';return}
-  NET.peer=new Peer();
-  NET.peer.on('open',()=>{
-    const c=NET.peer.connect('ln6-'+kode,{reliable:true});
-    NET.conn=c;setupConn();
-    c.on('open',()=>{NET.connected=true;$('onJoinStatus').textContent='Tersambung!';mulaiPemilihanOnline()});
+  const kode=$('onCodeIn').value.trim();
+  if(!/^\d{4}$/.test(kode)){statusJoin('Kode terdiri dari 4 angka.');return}
+  if(typeof Peer==='undefined'){statusJoin(PESAN.modul);return}
+  putusOnline();NET.role='guest'; /* bersihkan percobaan sebelumnya, lalu mulai yang baru */
+  const id=NET.coba;let tahap=1;
+  $('onConnect').disabled=true;statusJoin('1/3 Menghubungi server perantara…');
+  const peer=NET.peer=new Peer(),usang=()=>id!==NET.coba||NET.peer!==peer;
+  const gagal=pesan=>{if(usang()||NET.connected)return;putusOnline();$('onConnect').disabled=false;statusJoin(pesan)};
+  NET.tJalur=setTimeout(()=>gagal(tahap===1?PESAN.server:tahap===2?PESAN.diam:PESAN.jalur),BATAS_JALUR);
+  peer.on('open',()=>{
+    if(usang())return;
+    tahap=2;statusJoin('2/3 Mencari lawan dengan kode '+kode+'…');
+    const c=peer.connect(AWALAN+kode,{reliable:true});
+    NET.conn=c;pasangConn(c);
+    c.on('error',()=>gagal(PESAN.jalur));
+    pantauJalur(c,()=>gagal(PESAN.jalur),()=>{if(usang()||NET.connected||tahap===3)return;tahap=3;statusJoin('3/3 Lawan ditemukan. Membuka jalur langsung…')});
+    c.on('open',()=>{if(usang()||NET.conn!==c)return;hentiTimer();NET.connected=true;$('onConnect').disabled=false;statusJoin('Tersambung!');mulaiPemilihanOnline()});
   });
-  NET.peer.on('error',e=>{$('onJoinStatus').textContent='Gagal: '+((e&&e.type)||e)});
+  peer.on('error',e=>gagal(pesanGalat(e)));
 }
 function mulaiPemilihanOnline(){
   $('onHostBox').hidden=true;$('onJoinBox').hidden=true;$('onPickBox').hidden=false;
   NET.myPick=pil.p1;NET.peerPick=null;NET.siapSaya=false;NET.siapLawan=false;
   segarOnlinePick();
+  kirim({t:'pick',k:NET.myPick}); /* petarung yang tampak terpilih langsung dikirim ke lawan, tanpa harus diklik dulu */
 }
 function segarOnlinePick(){
   document.querySelectorAll('#barisOnline .kt').forEach(t=>t.classList.toggle('p1',t.dataset.k===NET.myPick));
@@ -1404,13 +1472,17 @@ function segarOnlinePick(){
 function cobaMulaiOnline(){
   if(NET.role!=='host'||!NET.siapSaya||!NET.siapLawan)return;
   const p1k=NET.myPick,p2k=NET.peerPick||URUT[(URUT.indexOf(p1k)+1)%URUT.length],w=pil.waktu||60;
-  kirim({t:'start',p1:p1k,p2:p2k,waktu:w});
-  mulaiOnlineMatch(p1k,p2k,w);
+  /* host menentukan arena dan benih acakan, lalu mengirimkannya: kedua laptop memakai yang sama */
+  const arena=Object.keys(ARENA)[Math.random()*5|0],benihBaru=1+Math.floor(Math.random()*2147483645);
+  kirim({t:'start',p1:p1k,p2:p2k,waktu:w,arena,benih:benihBaru});
+  mulaiOnlineMatch(p1k,p2k,w,arena,benihBaru);
 }
-function mulaiOnlineMatch(p1k,p2k,w){
+function mulaiOnlineMatch(p1k,p2k,w,arena,benihBaru){
   pil.p1=p1k;pil.p2=p2k;pil.waktu=w;mode='online';
-  NET.frame=0;NET.sendFrame=0;NET.localBuf={};NET.remoteBuf={};
-  mulaiLaga();
+  benihLaga=benihBaru>0&&benihBaru<2147483647?Math.floor(benihBaru):1;
+  NET.frame=0;NET.tunggu=0;NET.localBuf={};NET.remoteBuf={};
+  for(let n=0;n<TUNDA;n++){NET.localBuf[n]={l:0,r:0,u:0,d:0,p:0,k:0,b:0};NET.remoteBuf[n]={l:0,r:0,u:0,d:0,p:0,k:0,b:0}} /* TUNDA langkah pertama: belum ada tombol dari siapa pun */
+  mulaiLaga(arena);
 }
 $('btnOnline').addEventListener('click',bukaOnline);
 $('onHost').addEventListener('click',onlineHost);$('onJoin').addEventListener('click',onlineJoinUI);
@@ -1419,6 +1491,15 @@ $('onSiap').addEventListener('click',()=>{
   NET.siapSaya=true;$('onSiap').textContent='MENUNGGU LAWAN…';$('onSiap').disabled=true;
   kirim({t:'ready'});cobaMulaiOnline();
 });
+
+/* layar sentuh saat online: tombol KELUAR (ketuk dua kali agar tidak terpencet tak sengaja) dan petunjuk kontrol */
+let keluarT=0;
+$('tKeluar').addEventListener('click',()=>{
+  if(keluarT&&performance.now()-keluarT<3000){keluarT=0;$('tKeluar').textContent='X KELUAR';keMenu();return}
+  keluarT=performance.now();$('tKeluar').textContent='KETUK LAGI = KELUAR';
+  setTimeout(()=>{if(keluarT&&performance.now()-keluarT>=2900){keluarT=0;$('tKeluar').textContent='X KELUAR'}},3000);
+});
+if(layarSentuh)$('onCara').innerHTML='HP: tombol arah, PUKUL, TENDANG, TANGKIS muncul di layar saat laga · putar HP mendatar agar layar lebih besar<br>Keyboard: <b>W A S D</b> atau <b>SPASI</b> lompat · <b>,</b> pukul · <b>.</b> tendang · <b>/</b> tangkis';
 
 /* keyboard */
 const CEGAH=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','Quote','Semicolon','Slash'];
@@ -1466,7 +1547,7 @@ document.querySelectorAll('.tb').forEach(b=>{
 siapkanArena('monas');p1=buatPetarung('jalu',120,1);p2=buatPetarung('bandeng',264,-1);
 bangunPilih();bangunOnline();segarPilih();aturLapisan();
 let akhir=performance.now(),tumpuk=0;
-function putar(now){tumpuk+=Math.min(100,now-akhir);akhir=now;while(tumpuk>=1000/60){if(mode==='online'&&NET.connected&&fase!=='menu'&&fase!=='pilih'&&fase!=='hasil'&&fase!=='jeda'&&fase!=='online')sampleKirimOnline();langkah();tumpuk-=1000/60}gambar();requestAnimationFrame(putar)}
+function putar(now){tumpuk+=Math.min(100,now-akhir);akhir=now;while(tumpuk>=1000/60){langkah();tumpuk-=1000/60}gambar();requestAnimationFrame(putar)}
 Promise.race([document.fonts?document.fonts.load('8px "Press Start 2P"'):0,new Promise(r=>setTimeout(r,1500))]).catch(()=>{}).finally(()=>requestAnimationFrame(putar));
 </script>
 </body>
